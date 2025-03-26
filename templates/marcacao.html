@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marcação de Consulta</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="/static/logo.png" alt="Logo">
+        </div>
+        <h1>Agendamento de consultas (Psicologia)</h1>
+    </header>
+    
+    <form method="POST">
+        <label for="nome">Nome:</label>
+        <input type="text" name="nome" required>
+        
+        <label for="email">E-mail:</label>
+        <input type="email" name="email" required>
+        
+        <label for="data">Data:</label>
+        <input type="date" id="data" name="data" required>
+        
+        <label for="horario">Horário:</label>
+        <select id="horario" name="horario" required>
+            <option value="">Selecione um horário</option>
+            <option value="08:00">08:00 - 09:00</option>
+            <option value="09:00">09:00 - 10:00</option>
+            <option value="10:00">10:00 - 11:00</option>
+            <option value="11:00">11:00 - 12:00</option>
+            <option value="13:00">13:00 - 14:00</option>
+            <option value="14:00">14:00 - 15:00</option>
+            <option value="15:00">15:00 - 16:00</option>
+        </select>
+
+        <!-- Botão de envio com a classe personalizada para estilização -->
+        <button type="submit" class="marcar-consulta-btn">Marcar Consulta</button>
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const dataInput = document.getElementById('data');
+
+            function validarData() {
+                if (dataInput.value) {
+                    const dataSelecionada = new Date(dataInput.value + 'T00:00:00');
+                    const diaSemana = dataSelecionada.getDay();
+
+                    if (diaSemana === 6 || diaSemana === 0) {
+                        alert('Não é possível agendar para sábados ou domingos.');
+                        dataInput.value = '';
+                    }
+                }
+            }
+
+            dataInput.addEventListener('change', validarData);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmação da Consulta</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="/static/logo.png" alt="Logo">
+        </div>
+        <h1>Verifique se os dados estão corretos</h1>
+    </header>
+    <div>
+        <p>Nome: {{ nome }}</p>
+        <p>Email: {{ email }}</p>
+        <p>Data: {{ data }}</p>
+        <p>Horário: {{ horario }}</p>
+        <form method="POST">
+            <button type="submit" name="confirmar" value="true">Confirmar</button>
+            <button type="submit" name="confirmar" value="false">Cancelar</button>
+        </form>
+    </div>
+</body>
+</html>
