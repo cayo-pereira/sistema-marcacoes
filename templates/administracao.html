@@ -28,6 +28,7 @@
             <th>Email</th>
             <th>Data</th>
             <th>Horário</th>
+            <th>Matricula</th>
             <th class="acao-coluna">Ação</th> <!-- Adicionando a classe para a coluna de ação -->
         </tr>
         {% for consulta in consultas %}
@@ -36,6 +37,7 @@
             <td>{{ consulta[2] }}</td>
             <td>{{ consulta[3] }}</td>
             <td>{{ consulta[4] }}</td>
+            <td>{{ consulta[6] }}</td>
             <td class="acao-coluna">
                 <form method="POST" action="/admin/excluir">
                     <input type="hidden" name="id" value="{{ consulta[0] }}">

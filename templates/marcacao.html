@@ -15,48 +15,78 @@
     </header>
     
     <form method="POST">
-        <label for="nome">Nome:</label>
-        <input type="text" name="nome" required>
+        <label for="nome">Nome Completo:</label>
+        <input type="text" name="nome" value="{{ request.form['nome'] if request.form.get('nome') else '' }}" required>
         
-        <label for="email">E-mail:</label>
-        <input type="email" name="email" required>
+        <label for="email">E-mail Institucional:</label>
+        <input type="email" name="email" value="{{ request.form['email'] if request.form.get('email') else '' }}" required>
         
-        <label for="data">Data:</label>
-        <input type="date" id="data" name="data" required>
+        <label for="matricula">Matrícula Reduzida:</label>
+        <input type="text" name="matricula" id="matricula" required pattern="\d{4,8}" title="A matrícula deve conter entre 4 e 8 números">
         
-        <label for="horario">Horário:</label>
-        <select id="horario" name="horario" required>
-            <option value="">Selecione um horário</option>
-            <option value="08:00">08:00 - 09:00</option>
-            <option value="09:00">09:00 - 10:00</option>
-            <option value="10:00">10:00 - 11:00</option>
-            <option value="11:00">11:00 - 12:00</option>
-            <option value="13:00">13:00 - 14:00</option>
-            <option value="14:00">14:00 - 15:00</option>
-            <option value="15:00">15:00 - 16:00</option>
+        <label for="data">Data da Consulta:</label>
+        <input type="date" id="data" name="data" value="{{ request.form['data'] if request.form.get('data') else '' }}" required>
+
+        <label for="horario">Horário da Consulta:</label>
+        <select id="horario" name="horario" required disabled>
+            <option value="">Selecione primeiro uma data válida</option>
         </select>
 
-        <!-- Botão de envio com a classe personalizada para estilização -->
         <button type="submit" class="marcar-consulta-btn">Marcar Consulta</button>
     </form>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const dataInput = document.getElementById('data');
+            const horarioSelect = document.getElementById('horario');
 
-            function validarData() {
-                if (dataInput.value) {
-                    const dataSelecionada = new Date(dataInput.value + 'T00:00:00');
-                    const diaSemana = dataSelecionada.getDay();
-
-                    if (diaSemana === 6 || diaSemana === 0) {
-                        alert('Não é possível agendar para sábados ou domingos.');
-                        dataInput.value = '';
-                    }
+            function atualizarHorariosDisponiveis() {
+                if (!dataInput.value) {
+                    horarioSelect.innerHTML = '<option value="">Selecione primeiro uma data válida</option>';
+                    horarioSelect.disabled = true;
+                    return;
                 }
+
+                // Mostrar mensagem de carregamento
+                horarioSelect.innerHTML = '<option value="">Carregando horários disponíveis...</option>';
+                horarioSelect.disabled = true;
+
+                fetch(`/get_horarios_disponiveis?data=${dataInput.value}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Erro na requisição');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.error) {
+                            alert(data.error);
+                            dataInput.value = '';
+                            horarioSelect.innerHTML = '<option value="">Selecione primeiro uma data válida</option>';
+                            horarioSelect.disabled = true;
+                            return;
+                        }
+
+                        if (data.length === 0) {
+                            horarioSelect.innerHTML = '<option value="">Nenhum horário disponível para esta data</option>';
+                        } else {
+                            horarioSelect.innerHTML = '<option value="">Selecione um horário</option>';
+                            data.forEach(horario => {
+                                const option = document.createElement('option');
+                                option.value = horario;
+                                option.textContent = horario;
+                                horarioSelect.appendChild(option);
+                            });
+                        }
+                        horarioSelect.disabled = false;
+                    })
+                    .catch(error => {
+                        console.error('Erro:', error);
+                        horarioSelect.innerHTML = '<option value="">Erro ao carregar horários</option>';
+                    });
             }
 
-            dataInput.addEventListener('change', validarData);
+            dataInput.addEventListener('change', atualizarHorariosDisponiveis);
         });
     </script>
 </body>
