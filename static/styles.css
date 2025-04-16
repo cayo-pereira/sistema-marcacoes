@@ -1,4 +1,4 @@
-body {
+html, body {
     font-family: Arial, sans-serif;
     background-color: #ffffff;
     color: #00407a;
@@ -172,30 +172,31 @@ body.page-administracao header {
         flex-direction: column;
         padding: 15px 10px;
         position: relative;
+        gap: 0.5px;
     }
-    
+
     .logout-form {
         position: static;
         transform: none;
         margin: 10px auto 0 auto;
         width: auto;
     }
-    
+
     .btn-sair {
         width: 100%;
         max-width: 100px;
         margin: 5px auto;
     }
-    
+
     /* Oculta os cabeçalhos da tabela no mobile */
     thead {
         display: none !important;
     }
-    
+
     table {
         border: 0;
     }
-    
+
     table tr {
         display: block;
         margin-bottom: 20px;
@@ -205,7 +206,7 @@ body.page-administracao header {
         background-color: #f9f9f9;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    
+
     td {
         display: flex;
         justify-content: space-between;
@@ -215,7 +216,7 @@ body.page-administracao header {
         border-bottom: 1px solid #eee;
         position: relative;
     }
-    
+
     td::before {
         content: attr(data-label);
         font-weight: bold;
@@ -226,28 +227,57 @@ body.page-administracao header {
         text-align: left;
         white-space: nowrap;
     }
-    
+
     td:last-child {
         border-bottom: 0;
     }
-    
+
     .acao-coluna {
         display: block;
         text-align: center !important;
     }
-    
+
     .acao-coluna::before {
         display: none;
     }
-    
+
     .acao-coluna form {
         margin: 0 auto;
         max-width: 100%;
     }
-    
+
     .btn-excluir {
         width: 100%;
         margin: 5px 0;
+    }
+
+    /* --- NOVO BLOCO: Ajustes do formulário para telas menores --- */
+    form {
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    label {
+        font-size: 1rem;
+        margin-top: 1rem;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="date"],
+    select,
+    button.marcar-consulta-btn {
+        width: 100%;
+        font-size: 1rem;
+        padding: 0.75rem;
+        box-sizing: border-box;
+        margin-top: 0.25rem;
+    }
+
+    button.marcar-consulta-btn {
+        margin-top: 1.5rem;
     }
 }
 
@@ -256,23 +286,26 @@ body.page-administracao header {
     body {
         padding: 0;
     }
-    
+
     form {
         padding: 15px;
         margin: 15px auto;
     }
-    
-    input, button, select {
+
+    input,
+    button,
+    select {
         padding: 8px;
         font-size: 14px;
     }
-    
+
     button {
         padding: 10px 15px;
     }
-    
+
     td::before {
         width: 40%;
         font-size: 14px;
     }
 }
+
