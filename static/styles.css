@@ -5,6 +5,8 @@ body {
     text-align: center;
     margin: 0;
     padding: 0;
+    width: 100%;
+    overflow-x: hidden;
 }
 
 header {
@@ -14,26 +16,28 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 20px; /* Garantir espaçamento entre os itens */
+    gap: 20px;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+    margin: 0;
 }
 
 .logo img {
     height: 50px;
 }
 
-/* Estilização do formulário para limitar largura */
 form {
     background-color: white;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     width: 100%;
-    max-width: 400px;  /* Limita a largura */
+    max-width: 400px;
     margin: 20px auto;
     text-align: left;
 }
 
-/* Ajuste no tamanho dos inputs e botões */
 input, button, select {
     width: 100%;
     padding: 10px;
@@ -41,10 +45,9 @@ input, button, select {
     border: 1px solid #00407a;
     border-radius: 5px;
     font-size: 16px;
-    box-sizing: border-box;  /* Garante que padding seja considerado no tamanho do campo */
+    box-sizing: border-box;
 }
 
-/* Estilização do botão para não ocupar largura máxima */
 button {
     background-color: #00407a;
     color: white;
@@ -62,48 +65,45 @@ button:hover {
     background-color: #003060;
 }
 
-/* Estilização do botão "Selecionar Horário" - mais moderno */
 button.selecionar-horario {
-    background-color: #00407a;  /* Cor de fundo */
-    color: white;  /* Cor do texto */
-    font-size: 16px;  /* Tamanho da fonte */
+    background-color: #00407a;
+    color: white;
+    font-size: 16px;
     cursor: pointer;
-    padding: 12px 20px;  /* Espaçamento interno */
+    padding: 12px 20px;
     border: none;
-    border-radius: 50px;  /* Bordas arredondadas */
+    border-radius: 50px;
     text-align: center;
     display: block;
     width: auto;
     min-width: 150px;
     margin: 10px auto;
-    transition: all 0.3s ease;  /* Transição suave para efeitos */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  /* Sombra suave */
-    background-image: linear-gradient(45deg, #00407a, #0068b7);  /* Gradiente no fundo */
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-image: linear-gradient(45deg, #00407a, #0068b7);
 }
 
 button.selecionar-horario:hover {
-    background-color: #003060;  /* Cor de fundo mais escura no hover */
-    background-image: linear-gradient(45deg, #003060, #005aa3);  /* Gradiente mais escuro no hover */
-    transform: translateY(-2px);  /* Leve elevação no hover */
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);  /* Sombra mais forte no hover */
+    background-color: #003060;
+    background-image: linear-gradient(45deg, #003060, #005aa3);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
 button.selecionar-horario:focus {
-    outline: none;  /* Remove o contorno */
-    box-shadow: 0 0 10px rgba(0, 99, 160, 0.5);  /* Sombra azul quando o botão é focado */
+    outline: none;
+    box-shadow: 0 0 10px rgba(0, 99, 160, 0.5);
 }
 
-/* Estilização do botão de logout menor */
 .logout-form {
     background-color: transparent;
     padding: 0;
     box-shadow: none;
     width: auto;
     display: inline-block;
-    text-align: center;
-    position: absolute; /* Posiciona o botão fora do fluxo normal */
-    right: 20px; /* Alinha o botão à direita */
-    transform: translateY(-50%); /* Ajusta o alinhamento vertical */
+    position: absolute;
+    right: 20px;
+    transform: translateY(-50%);
     margin: 0 auto;
 }
 
@@ -114,17 +114,15 @@ button.selecionar-horario:focus {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    width: auto;  /* O botão agora tem o tamanho necessário */
+    width: auto;
     display: inline-block;
     text-align: center;
-    margin: 0 auto;  /* Centraliza o botão */
 }
 
 .btn-sair:hover {
     background-color: #c9302c;
 }
 
-/* Estilização do botão de exclusão */
 .btn-excluir {
     background-color: #d9534f;
     border: none;
@@ -140,7 +138,6 @@ button.selecionar-horario:focus {
     background-color: #c9302c;
 }
 
-/* Ajusta a largura da coluna "Ação" para comportar melhor o botão */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -159,7 +156,6 @@ td.acao-coluna {
     text-align: center;
 }
 
-/* Garantir que o cabeçalho da página de administração seja ajustado */
 body.page-administracao header {
     background-color: #00407a;
     color: white;
@@ -167,5 +163,116 @@ body.page-administracao header {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 20px; /* Garantir espaçamento entre os itens */
+    gap: 20px;
+}
+
+/* Ajuste para dispositivos móveis */
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        padding: 15px 10px;
+        position: relative;
+    }
+    
+    .logout-form {
+        position: static;
+        transform: none;
+        margin: 10px auto 0 auto;
+        width: auto;
+    }
+    
+    .btn-sair {
+        width: 100%;
+        max-width: 100px;
+        margin: 5px auto;
+    }
+    
+    /* Oculta os cabeçalhos da tabela no mobile */
+    thead {
+        display: none !important;
+    }
+    
+    table {
+        border: 0;
+    }
+    
+    table tr {
+        display: block;
+        margin-bottom: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 0;
+        background-color: #f9f9f9;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 15px;
+        text-align: right;
+        border-bottom: 1px solid #eee;
+        position: relative;
+    }
+    
+    td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: #00407a;
+        float: left;
+        width: 45%;
+        padding-right: 10px;
+        text-align: left;
+        white-space: nowrap;
+    }
+    
+    td:last-child {
+        border-bottom: 0;
+    }
+    
+    .acao-coluna {
+        display: block;
+        text-align: center !important;
+    }
+    
+    .acao-coluna::before {
+        display: none;
+    }
+    
+    .acao-coluna form {
+        margin: 0 auto;
+        max-width: 100%;
+    }
+    
+    .btn-excluir {
+        width: 100%;
+        margin: 5px 0;
+    }
+}
+
+/* Ajustes para telas muito pequenas */
+@media (max-width: 480px) {
+    body {
+        padding: 0;
+    }
+    
+    form {
+        padding: 15px;
+        margin: 15px auto;
+    }
+    
+    input, button, select {
+        padding: 8px;
+        font-size: 14px;
+    }
+    
+    button {
+        padding: 10px 15px;
+    }
+    
+    td::before {
+        width: 40%;
+        font-size: 14px;
+    }
 }

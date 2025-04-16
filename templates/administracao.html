@@ -18,34 +18,36 @@
             <button type="submit" class="btn-sair">Sair</button>
         </form>
         
-    </header>
-
-    
-    
+    </header> 
     <table border="1">
-        <tr>
-            <th>Nome</th>
-            <th>Email</th>
-            <th>Data</th>
-            <th>Horário</th>
-            <th>Matricula</th>
-            <th class="acao-coluna">Ação</th> <!-- Adicionando a classe para a coluna de ação -->
-        </tr>
-        {% for consulta in consultas %}
-        <tr>
-            <td>{{ consulta[1] }}</td>
-            <td>{{ consulta[2] }}</td>
-            <td>{{ consulta[3] }}</td>
-            <td>{{ consulta[4] }}</td>
-            <td>{{ consulta[6] }}</td>
-            <td class="acao-coluna">
-                <form method="POST" action="/admin/excluir">
-                    <input type="hidden" name="id" value="{{ consulta[0] }}">
-                    <button type="submit" class="btn-excluir">Excluir</button>
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Data</th>
+                <th>Horário</th>
+                <th>Matricula</th>
+                <th class="acao-coluna">Ação</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for consulta in consultas %}
+            <tr>
+                <td data-label="Nome">{{ consulta[1] }}</td>
+                <td data-label="Email">{{ consulta[2] }}</td>
+                <td data-label="Data">{{ consulta[3] }}</td>
+                <td data-label="Horário">{{ consulta[4] }}</td>
+                <td data-label="Matrícula">{{ consulta[6] }}</td>
+                <td class="acao-coluna" data-label="Ação">
+                    <form method="POST" action="/admin/excluir">
+                        <input type="hidden" name="id" value="{{ consulta[0] }}">
+                        <button type="submit" class="btn-excluir">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
+    
 </body>
 </html>
