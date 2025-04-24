@@ -17,6 +17,11 @@
         <form method="POST" action="{{ url_for('logout') }}" class="logout-form">
             <button type="submit" class="btn-sair">Sair</button>
         </form>
+        <form method="GET" action="{{ url_for('admin') }}" class="filtro-form">
+            <label for="filtro_data">Filtrar por data:</label>
+            <input type="date" name="filtro_data" id="filtro_data" value="{{ filtro_data|default('') }}">
+            <button type="submit" class="btn-filtrar">Filtrar</button>
+        </form>
         
     </header> 
     <table border="1">

@@ -106,6 +106,15 @@ def data_valida(data):
     data_selecionada = datetime.strptime(data, '%Y-%m-%d')
     return data_selecionada.weekday() < 5  # 0-4 representa segunda a sexta-feira
 
+def get_consultas_por_data(data):
+    conn = sqlite3.connect('consultas.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM marcacoes WHERE data = ? ORDER BY horario', (data,))
+    consultas = cursor.fetchall()
+    conn.close()
+    return consultas
+
+
 @app.route('/', methods=['GET', 'POST'])
 def marcacao():
     if request.method == 'POST':
@@ -195,9 +204,16 @@ def sucesso():
 def admin():
     if 'admin' not in session:
         return redirect(url_for('login'))
-    
-    consultas = get_all_consultas()
-    return render_template('administracao.html', consultas=consultas)
+
+    filtro_data = request.args.get('filtro_data')  # Pega o valor do filtro (se existir)
+
+    if filtro_data:
+        consultas = get_consultas_por_data(filtro_data)
+    else:
+        consultas = get_all_consultas()
+
+    return render_template('administracao.html', consultas=consultas, filtro_data=filtro_data)
+
 
 @app.route('/admin/excluir', methods=['POST'])
 def excluir():

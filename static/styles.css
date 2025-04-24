@@ -308,4 +308,43 @@ body.page-administracao header {
         font-size: 14px;
     }
 }
+.filtro-form {
+    position: absolute;
+    bottom: 10px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: nowrap; /* Desktop: continua em linha */
+}
 
+.filtro-form input[type="date"],
+.filtro-form button {
+    padding: 4px 8px;
+    font-size: 14px;
+}
+
+header {
+    position: relative;
+}
+
+/* Ajuste do filtro para telas menores */
+@media (max-width: 768px) {
+    .filtro-form {
+        position: static; /* remove o posicionamento absoluto */
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 10px;
+        width: 100%;
+        padding: 0 15px;
+    }
+
+    .filtro-form input[type="date"],
+    .filtro-form button {
+        width: 100%;
+        font-size: 16px;
+        padding: 10px;
+    }
+}
