@@ -1,8 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from datetime import datetime
 import sqlite3
-import smtplib
-from email.mime.text import MIMEText
 import config
 import json
 
@@ -12,10 +10,6 @@ app.secret_key = 'chave_secreta'
 # Configurações
 ADMIN_USER = config.ADMIN_USER
 ADMIN_PASS = config.ADMIN_PASS
-EMAIL_USER = config.EMAIL_USER
-EMAIL_PASS = config.EMAIL_PASS
-SMTP_SERVER = config.SMTP_SERVER
-SMTP_PORT = config.SMTP_PORT
 
 # ----- Banco de Dados -----
 def init_db():
@@ -206,40 +200,6 @@ def data_valida(data):
     data_obj = datetime.strptime(data, '%Y-%m-%d')
     return data_obj.weekday() < 5
 
-def enviar_email_confirmacao(email, data, horario):
-    msg = MIMEText(f'Sua consulta foi agendada para o dia {data} às {horario}.')
-    msg['Subject'] = 'Confirmação de Consulta'
-    msg['From'] = EMAIL_USER
-    msg['To'] = email
-    try:
-        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
-        server.starttls()
-        server.login(EMAIL_USER, EMAIL_PASS)
-        server.sendmail(msg['From'], [msg['To']], msg.as_string())
-        server.quit()
-        
-        # Registra no log de auditoria
-        log_audit(
-            action="SEND_CONFIRMATION_EMAIL",
-            entity_type="Email",
-            new_value={
-                'to': email,
-                'subject': msg['Subject'],
-                'data_consulta': data,
-                'horario_consulta': horario
-            }
-        )
-    except Exception as e:
-        print(f'Erro ao enviar o e-mail: {e}')
-        log_audit(
-            action="EMAIL_SEND_ERROR",
-            entity_type="Email",
-            new_value={
-                'error': str(e),
-                'to': email
-            }
-        )
-
 def get_audit_logs(limit=100):
     """Obtém os logs de auditoria"""
     conn = sqlite3.connect('consultas.db')
@@ -335,7 +295,6 @@ def confirmacao():
         if request.form['confirmar'] == 'true':
             semana = datetime.strptime(consulta['data'], '%Y-%m-%d').isocalendar()[1]
             salvar_marcacao(consulta['nome'], consulta['email'], consulta['matricula'], consulta['data'], consulta['horario'], semana)
-            enviar_email_confirmacao(consulta['email'], consulta['data'], consulta['horario'])
             session.pop('consulta')
             return redirect(url_for('sucesso', data=consulta['data'], horario=consulta['horario']))
         else:
