@@ -158,9 +158,11 @@ def get_consulta_by_id(consulta_id):
     return consulta
 
 def excluir_consulta(consulta_id):
-    # Obtém os dados antes de excluir para registrar no log
     consulta = get_consulta_by_id(consulta_id)
     if consulta:
+        # Pega o nome do admin do config.py se não estiver na sessão
+        admin_user = session.get('admin_username', ADMIN_USER)  # Usa ADMIN_USER do config
+        
         consulta_dict = {
             'id': consulta[0],
             'nome': consulta[1],
@@ -169,7 +171,7 @@ def excluir_consulta(consulta_id):
             'horario': consulta[4],
             'semana': consulta[5],
             'matricula': consulta[6],
-            'deleted_by': session.get('admin', 'Unknown')  # Adiciona quem excluiu
+            'deleted_by': admin_user
         }
         
         conn = sqlite3.connect('consultas.db')
@@ -178,12 +180,11 @@ def excluir_consulta(consulta_id):
         conn.commit()
         conn.close()
         
-        # Registra no log de auditoria
         log_audit(
             action="DELETE_APPOINTMENT",
             entity_type="Marcacao",
             entity_id=consulta_id,
-            old_value=consulta_dict  # Agora inclui quem deletou
+            old_value=consulta_dict
         )
         return True
     return False
@@ -343,6 +344,7 @@ def login():
         senha = request.form['senha']
         if usuario == ADMIN_USER and senha == ADMIN_PASS:
             session['admin'] = True
+            session['admin_username'] = usuario  # Armazena o nome REAL do config.py
             log_audit(
                 action="ADMIN_LOGIN",
                 entity_type="User",
@@ -363,9 +365,9 @@ def logout():
         log_audit(
             action="ADMIN_LOGOUT",
             entity_type="User",
-            new_value={'username': 'admin'}
+            new_value={'username': session.get('admin_username', 'admin')}
         )
-    session.pop('admin', None)
+    session.clear()  # Limpa TODOS os dados da sessão
     return redirect(url_for('login'))
 
 @app.route('/admin/logs/legend')
@@ -381,6 +383,14 @@ def view_logs():  # Esta é a rota principal para visualizar os logs
     
     logs = get_audit_logs()
     return render_template('audit_logs.html', logs=logs)
+
+@app.route('/debug')
+def debug():
+    return f"""
+    Admin logado: {session.get('admin', False)}<br>
+    Nome do admin: {session.get('admin_username', 'Não definido')}<br>
+    ADMIN_USER do config: {config.ADMIN_USER}
+    """
 
 if __name__ == '__main__':
     init_db()

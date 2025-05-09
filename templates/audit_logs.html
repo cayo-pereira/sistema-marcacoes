@@ -46,7 +46,9 @@
                 <td>
                     {% if log.old_value %}
                         {% if log.action == "DELETE_APPOINTMENT" and log.old_value.deleted_by %}
-                            <p class="deleted-by">Excluído por: {{ log.old_value.deleted_by }}</p>
+                            <p style="color: #d9534f; font-weight: bold;">
+                                Excluído por: {{ log.old_value.deleted_by }}
+                            </p>
                         {% endif %}
                         <strong>Antes:</strong>
                         <pre>{{ log.old_value }}</pre>
