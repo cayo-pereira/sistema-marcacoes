@@ -4,6 +4,7 @@ import sqlite3
 import smtplib
 from email.mime.text import MIMEText
 import config
+import json
 
 app = Flask(__name__)
 app.secret_key = 'chave_secreta'
@@ -20,6 +21,8 @@ SMTP_PORT = config.SMTP_PORT
 def init_db():
     conn = sqlite3.connect('consultas.db')
     c = conn.cursor()
+    
+    # Tabela de marcações
     c.execute('''
     CREATE TABLE IF NOT EXISTS marcacoes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,8 +34,62 @@ def init_db():
         matricula TEXT NOT NULL
     )
     ''')
+    
+    # Tabela de logs de auditoria
+    c.execute('''
+    CREATE TABLE IF NOT EXISTS audit_logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT,
+        action TEXT NOT NULL,
+        entity_type TEXT NOT NULL,
+        entity_id INTEGER,
+        old_value TEXT,
+        new_value TEXT,
+        ip_address TEXT,
+        created_at TEXT NOT NULL
+    )
+    ''')
+    
     conn.commit()
     conn.close()
+
+def log_audit(action, entity_type, entity_id=None, old_value=None, new_value=None):
+    """Registra uma ação no log de auditoria"""
+    try:
+        conn = sqlite3.connect('consultas.db')
+        c = conn.cursor()
+        
+        # Obtém o usuário atual (se estiver logado)
+        user_id = session.get('admin', 'Anonymous')
+        
+        # Obtém o IP do cliente
+        ip_address = request.remote_addr
+        
+        # Converte valores para string (se necessário)
+        old_value_str = json.dumps(old_value) if old_value is not None else None
+        new_value_str = json.dumps(new_value) if new_value is not None else None
+        
+        # Insere o log no banco de dados
+        c.execute('''
+        INSERT INTO audit_logs 
+        (user_id, action, entity_type, entity_id, old_value, new_value, ip_address, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (
+            user_id,
+            action,
+            entity_type,
+            entity_id,
+            old_value_str,
+            new_value_str,
+            ip_address,
+            datetime.now().isoformat()
+        ))
+        
+        conn.commit()
+    except Exception as e:
+        print(f"Erro ao registrar log de auditoria: {e}")
+    finally:
+        conn.close()
 
 def consulta_por_email_ou_matricula(email, matricula, semana):
     conn = sqlite3.connect('consultas.db')
@@ -60,8 +117,27 @@ def salvar_marcacao(nome, email, matricula, data, horario, semana):
     INSERT INTO marcacoes (nome, email, matricula, data, horario, semana) 
     VALUES (?, ?, ?, ?, ?, ?)
     ''', (nome, email, matricula, data, horario, semana))
+    consulta_id = c.lastrowid
     conn.commit()
     conn.close()
+    
+    # Registra no log de auditoria
+    nova_marcacao = {
+        'nome': nome,
+        'email': email,
+        'matricula': matricula,
+        'data': data,
+        'horario': horario,
+        'semana': semana
+    }
+    log_audit(
+        action="CREATE_APPOINTMENT",
+        entity_type="Marcacao",
+        entity_id=consulta_id,
+        new_value=nova_marcacao
+    )
+    
+    return consulta_id
 
 def get_all_consultas():
     conn = sqlite3.connect('consultas.db')
@@ -79,12 +155,44 @@ def get_consultas_por_data(data):
     conn.close()
     return consultas
 
-def excluir_consulta(consulta_id):
+def get_consulta_by_id(consulta_id):
     conn = sqlite3.connect('consultas.db')
     c = conn.cursor()
-    c.execute('DELETE FROM marcacoes WHERE id = ?', (consulta_id,))
-    conn.commit()
+    c.execute('SELECT * FROM marcacoes WHERE id = ?', (consulta_id,))
+    consulta = c.fetchone()
     conn.close()
+    return consulta
+
+def excluir_consulta(consulta_id):
+    # Obtém os dados antes de excluir para registrar no log
+    consulta = get_consulta_by_id(consulta_id)
+    if consulta:
+        consulta_dict = {
+            'id': consulta[0],
+            'nome': consulta[1],
+            'email': consulta[2],
+            'data': consulta[3],
+            'horario': consulta[4],
+            'semana': consulta[5],
+            'matricula': consulta[6],
+            'deleted_by': session.get('admin', 'Unknown')  # Adiciona quem excluiu
+        }
+        
+        conn = sqlite3.connect('consultas.db')
+        c = conn.cursor()
+        c.execute('DELETE FROM marcacoes WHERE id = ?', (consulta_id,))
+        conn.commit()
+        conn.close()
+        
+        # Registra no log de auditoria
+        log_audit(
+            action="DELETE_APPOINTMENT",
+            entity_type="Marcacao",
+            entity_id=consulta_id,
+            old_value=consulta_dict  # Agora inclui quem deletou
+        )
+        return True
+    return False
 
 def horarios_ocupados(data):
     conn = sqlite3.connect('consultas.db')
@@ -109,8 +217,57 @@ def enviar_email_confirmacao(email, data, horario):
         server.login(EMAIL_USER, EMAIL_PASS)
         server.sendmail(msg['From'], [msg['To']], msg.as_string())
         server.quit()
+        
+        # Registra no log de auditoria
+        log_audit(
+            action="SEND_CONFIRMATION_EMAIL",
+            entity_type="Email",
+            new_value={
+                'to': email,
+                'subject': msg['Subject'],
+                'data_consulta': data,
+                'horario_consulta': horario
+            }
+        )
     except Exception as e:
         print(f'Erro ao enviar o e-mail: {e}')
+        log_audit(
+            action="EMAIL_SEND_ERROR",
+            entity_type="Email",
+            new_value={
+                'error': str(e),
+                'to': email
+            }
+        )
+
+def get_audit_logs(limit=100):
+    """Obtém os logs de auditoria"""
+    conn = sqlite3.connect('consultas.db')
+    c = conn.cursor()
+    c.execute('''
+    SELECT * FROM audit_logs 
+    ORDER BY created_at DESC 
+    LIMIT ?
+    ''', (limit,))
+    logs = c.fetchall()
+    conn.close()
+    
+    # Converte para um formato mais legível
+    formatted_logs = []
+    for log in logs:
+        formatted_logs.append({
+            'id': log[0],
+            'user_id': log[1],
+            'action': log[2],
+            'entity_type': log[3],
+            'entity_id': log[4],
+            'old_value': json.loads(log[5]) if log[5] else None,
+            'new_value': json.loads(log[6]) if log[6] else None,
+            'ip_address': log[7],
+            'created_at': log[8]
+        })
+    
+    return formatted_logs
 
 # ----- Rotas -----
 @app.route('/', methods=['GET', 'POST'])
@@ -209,7 +366,13 @@ def excluir():
 
     consulta_id = int(request.form['id'])
     filtro_data = request.form.get('filtro_data')
+    
+    # Adiciona informação do administrador que está executando a ação
+    admin_user = session.get('admin', 'Unknown')
+    print(f"Admin {admin_user} está excluindo a consulta {consulta_id}")  # Log para debug
+    
     excluir_consulta(consulta_id)
+    
     if filtro_data:
         return redirect(url_for('admin', filtro_data=filtro_data))
     return redirect(url_for('admin'))
@@ -221,13 +384,44 @@ def login():
         senha = request.form['senha']
         if usuario == ADMIN_USER and senha == ADMIN_PASS:
             session['admin'] = True
+            log_audit(
+                action="ADMIN_LOGIN",
+                entity_type="User",
+                new_value={'username': usuario}
+            )
             return redirect(url_for('admin'))
+        else:
+            log_audit(
+                action="FAILED_LOGIN_ATTEMPT",
+                entity_type="User",
+                new_value={'username': usuario}
+            )
     return render_template('login.html')
 
 @app.route('/logout', methods=['POST'])
 def logout():
+    if 'admin' in session:
+        log_audit(
+            action="ADMIN_LOGOUT",
+            entity_type="User",
+            new_value={'username': 'admin'}
+        )
     session.pop('admin', None)
     return redirect(url_for('login'))
+
+@app.route('/admin/logs/legend')
+def log_legend():
+    if 'admin' not in session:
+        return redirect(url_for('login'))
+    return render_template('log_legend.html')
+
+@app.route('/admin/logs')
+def view_logs():  # Esta é a rota principal para visualizar os logs
+    if 'admin' not in session:
+        return redirect(url_for('login'))
+    
+    logs = get_audit_logs()
+    return render_template('audit_logs.html', logs=logs)
 
 if __name__ == '__main__':
     init_db()

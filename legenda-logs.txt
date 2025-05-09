@@ -1,0 +1,9 @@
+Ação do Log	        Descrição	                     Campos de Detalhes (Exemplo)	                          Explicação dos Campos
+CREATE_APPOINTMENT	Nova consulta agendada	             {'nome': 'João', 'email': 'joao@exemplo.com', ...}	          Registra todos os dados da nova marcação criada
+UPDATE_APPOINTMENT	Consulta modificada	             {'old': {dados antigos}, 'new': {dados novos}}	          Mostra alterações entre versões da consulta
+DELETE_APPOINTMENT	Consulta cancelada	             {'id': 5, 'nome': 'Maria', ...}	                          Registra os dados da consulta removida
+SEND_CONFIRMATION_EMAIL	Email de confirmação enviado	     {'to': 'cliente@email.com', 'data': '2023-10-01'}	          Destinatário e dados da consulta notificada
+EMAIL_SEND_ERROR	Falha no envio de email	             {'error': "(535, ...)", 'to': 'dest@mail.com'}	          Erro específico e destinatário pretendido
+ADMIN_LOGIN	        Login administrativo bem-sucedido    {'username': 'admin'}	                                  Usuário que fez login
+ADMIN_LOGOUT	        Logout do sistema administrativo     {'username': 'admin'}	                                  Usuário que fez logout
+FAILED_LOGIN_ATTEMPT	Tentativa de login falha	     {'username': 'tentativa'}	                                  Credenciais usadas na tentativa

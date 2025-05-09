@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logs de Auditoria</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        pre { white-space: pre-wrap; margin: 0; }
+        .back-link { display: block; margin-top: 20px; }
+        .deleted-by { color: #d9534f; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Logs de Auditoria</h1>
+    <a href="{{ url_for('log_legend') }}" style="display: block; margin: 20px 0;">
+        Ver Legenda Completa das Ações
+    </a>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Data/Hora</th>
+                <th>Ação</th>
+                <th>Usuário</th>
+                <th>Entidade</th>
+                <th>ID</th>
+                <th>IP</th>
+                <th>Detalhes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td>{{ log.created_at }}</td>
+                <td>{{ log.action }}</td>
+                <td>{{ log.user_id }}</td>
+                <td>{{ log.entity_type }}</td>
+                <td>{{ log.entity_id if log.entity_id else '-' }}</td>
+                <td>{{ log.ip_address }}</td>
+                <td>
+                    {% if log.old_value %}
+                        {% if log.action == "DELETE_APPOINTMENT" and log.old_value.deleted_by %}
+                            <p class="deleted-by">Excluído por: {{ log.old_value.deleted_by }}</p>
+                        {% endif %}
+                        <strong>Antes:</strong>
+                        <pre>{{ log.old_value }}</pre>
+                    {% endif %}
+                    {% if log.new_value %}
+                        <strong>Depois:</strong>
+                        <pre>{{ log.new_value }}</pre>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <a href="{{ url_for('admin') }}" class="back-link">Voltar para a administração</a>
+</body>
+</html>
