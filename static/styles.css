@@ -359,3 +359,19 @@ body.page-admin form:not(.logout-form):not(.filtro-form) {
     all: unset;
     display: block;
 }
+
+.btn-export {
+    padding: 6px 10px;
+    font-size: 14px;
+    background-color: #00a116;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: auto;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-export:hover {
+    background-color: #00b909;
+}

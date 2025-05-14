@@ -13,13 +13,32 @@
         </div>
         <h1>Painel de Administração</h1>
 
-          <!-- Formulário de logout com botão centralizado -->
+          <!-- Formulário combinado -->
         <form method="POST" action="{{ url_for('logout') }}" class="logout-form">
-            <button type="submit" class="btn-sair">Sair</button>
+            <!-- Botão Exportar como input submit com ação alternativa -->
+            <button type="submit" 
+                formaction="{{ url_for('exportar_consultas') }}"
+                formmethod="get"
+                class="btn-export">
+            Exportar
+        </button>
+    
+        <!-- Botão Sair -->
+        <button type="submit" class="btn-sair">Sair</button>
         </form>
+
         <form method="GET" action="{{ url_for('admin') }}" class="filtro-form">
             <input type="date" name="filtro_data" id="filtro_data" value="{{ filtro_data|default('') }}">
             <button type="submit" class="btn-filtrar">Filtrar</button>
+        </form>
+
+        <form method="GET" action="{{ url_for('admin') }}">
+            <input type="text" name="filtro_nome" placeholder="Pesquisar por nome" 
+                value="{{ filtro_nome if filtro_nome }}">
+            <button type="submit">Buscar</button>
+            {% if filtro_nome %}
+                <a href="{{ url_for('admin') }}">Limpar</a>
+            {% endif %}
         </form>
         
     </header> 

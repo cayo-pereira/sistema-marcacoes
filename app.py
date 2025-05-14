@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, make_response
 from datetime import datetime
+from io import StringIO
 import sqlite3
 import config
 import json
@@ -132,6 +133,14 @@ def salvar_marcacao(nome, email, matricula, data, horario, semana):
     )
     
     return consulta_id
+
+def get_consultas_por_nome(nome):
+    conn = sqlite3.connect('consultas.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM marcacoes WHERE nome LIKE ? ORDER BY data, horario', (f'%{nome}%',))
+    consultas = cursor.fetchall()
+    conn.close()
+    return consultas
 
 def get_all_consultas():
     conn = sqlite3.connect('consultas.db')
@@ -316,8 +325,19 @@ def admin():
         return redirect(url_for('login'))
 
     filtro_data = request.args.get('filtro_data')
-    consultas = get_consultas_por_data(filtro_data) if filtro_data else get_all_consultas()
-    return render_template('administracao.html', consultas=consultas, filtro_data=filtro_data)
+    filtro_nome = request.args.get('filtro_nome')  # Novo filtro
+    
+    if filtro_nome:
+        consultas = get_consultas_por_nome(filtro_nome)
+    elif filtro_data:
+        consultas = get_consultas_por_data(filtro_data)
+    else:
+        consultas = get_all_consultas()
+        
+    return render_template('administracao.html', 
+                         consultas=consultas, 
+                         filtro_data=filtro_data,
+                         filtro_nome=filtro_nome)  # Passa o filtro_nome para o template
 
 @app.route('/admin/excluir', methods=['POST'])
 def excluir():
@@ -391,6 +411,34 @@ def debug():
     Nome do admin: {session.get('admin_username', 'Não definido')}<br>
     ADMIN_USER do config: {config.ADMIN_USER}
     """
+
+@app.route('/admin/exportar')
+def exportar_consultas():
+    if 'admin' not in session:
+        return redirect(url_for('login'))
+    
+    consultas = get_all_consultas()
+    
+    # Cria o conteúdo CSV
+    csv_output = StringIO()
+    csv_output.write("Nome,Email,Data,Horário,Matrícula\n")
+    
+    for consulta in consultas:
+        csv_output.write(f'"{consulta[1]}","{consulta[2]}","{consulta[3]}","{consulta[4]}","{consulta[6]}"\n')
+    
+    # Configura a resposta
+    response = make_response(csv_output.getvalue())
+    response.headers["Content-Disposition"] = "attachment; filename=consultas.csv"
+    response.headers["Content-type"] = "text/csv"
+    
+    # Registra no log
+    log_audit(
+        action="EXPORT_APPOINTMENTS",
+        entity_type="System",
+        new_value={"exported_records": len(consultas)}
+    )
+    
+    return response
 
 if __name__ == '__main__':
     init_db()
