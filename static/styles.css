@@ -357,7 +357,7 @@ body.page-administracao header {
 /* Mantém esta regra para outros forms na página admin */
 body.page-admin form:not(.logout-form):not(.filtro-form) {
     all: unset;
-    display: block;
+    display: flex;
 }
 
 .btn-export {
@@ -375,3 +375,4 @@ body.page-admin form:not(.logout-form):not(.filtro-form) {
 .btn-export:hover {
     background-color: #00b909;
 }
+
