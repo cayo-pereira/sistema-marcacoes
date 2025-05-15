@@ -57,7 +57,7 @@ button {
     text-align: center;
     display: block;
     width: auto;
-    min-width: 120px;
+    min-width: 90px;
     margin: 10px auto;
 }
 
@@ -100,11 +100,12 @@ button.selecionar-horario:focus {
     padding: 0;
     box-shadow: none;
     width: auto;
-    display: inline-block;
+    display: grid;
     position: absolute;
     right: 20px;
     transform: translateY(-50%);
-    margin: 0 auto;
+    margin-top: 110px;
+
 }
 
 .btn-sair {
@@ -317,16 +318,17 @@ body.page-administracao header {
     gap: 10px;
     flex-wrap: nowrap;
     background-color: white;
-    padding: 10px;
+    padding: 5px;
     border-radius: 8px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-    width: 25%;
+    width: 28%;
 }
 
 .filtro-form input[type="date"],
 .filtro-form button {
-    padding: 4px 8px;
+    padding: 9px 9px;
     font-size: 14px;
+    width: 10%;
 }
 
 /* Ajuste do filtro para telas menores */

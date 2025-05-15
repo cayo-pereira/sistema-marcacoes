@@ -28,18 +28,21 @@
         </form>
 
         <form method="GET" action="{{ url_for('admin') }}" class="filtro-form">
+            <!-- Filtro por nome -->
+            <input type="text" name="filtro_nome" placeholder="Pesquisar por nome" value="{{ filtro_nome if filtro_nome }}">
+                       
+            <!-- Filtro por data -->
             <input type="date" name="filtro_data" id="filtro_data" value="{{ filtro_data|default('') }}">
+    
+            <!-- Botão de envio -->
             <button type="submit" class="btn-filtrar">Filtrar</button>
-        </form>
-
-        <form method="GET" action="{{ url_for('admin') }}">
-            <input type="text" name="filtro_nome" placeholder="Pesquisar por nome" 
-                value="{{ filtro_nome if filtro_nome }}">
-            <button type="submit">Buscar</button>
-            {% if filtro_nome %}
+    
+            <!-- Botão de limpar -->
+            {% if filtro_nome or filtro_data %}
                 <a href="{{ url_for('admin') }}">Limpar</a>
             {% endif %}
         </form>
+
         
     </header> 
     <table border="1">

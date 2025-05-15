@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, make_response
 from datetime import datetime
-from io import StringIO
+from openpyxl import Workbook
+from io import BytesIO
 import sqlite3
 import config
 import json
@@ -418,20 +419,30 @@ def exportar_consultas():
         return redirect(url_for('login'))
     
     consultas = get_all_consultas()
-    
-    # Cria o conteúdo CSV
-    csv_output = StringIO()
-    csv_output.write("Nome,Email,Data,Horário,Matrícula\n")
-    
+
+    # Cria um workbook do Excel
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Consultas"
+
+    # Cabeçalhos
+    ws.append(["Nome", "Email", "Data", "Horário", "Matrícula"])
+
+    # Dados
     for consulta in consultas:
-        csv_output.write(f'"{consulta[1]}","{consulta[2]}","{consulta[3]}","{consulta[4]}","{consulta[6]}"\n')
-    
+        ws.append([consulta[1], consulta[2], consulta[3], consulta[4], consulta[6]])
+
+    # Salva para um buffer em memória
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+
     # Configura a resposta
-    response = make_response(csv_output.getvalue())
-    response.headers["Content-Disposition"] = "attachment; filename=consultas.csv"
-    response.headers["Content-type"] = "text/csv"
-    
-    # Registra no log
+    response = make_response(output.read())
+    response.headers["Content-Disposition"] = "attachment; filename=consultas.xlsx"
+    response.headers["Content-type"] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+    # Log opcional
     log_audit(
         action="EXPORT_APPOINTMENTS",
         entity_type="System",
