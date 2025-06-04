@@ -10,7 +10,7 @@ html, body {
 }
 
 header {
-    background-color: #680000;
+    background-color: #00407a;
     color: white;
     padding: 20px;
     display: flex;
@@ -49,7 +49,7 @@ input, button, select {
 }
 
 button {
-    background-color: #720000;
+    background-color: #00407a;
     color: white;
     font-size: 16px;
     cursor: pointer;
@@ -62,7 +62,7 @@ button {
 }
 
 button:hover {
-    background-color: #920000;
+    background-color: #003060;
 }
 
 button.selecionar-horario {
@@ -167,7 +167,6 @@ body.page-administracao header {
     gap: 20px;
 }
 
-/* Ajuste para dispositivos móveis */
 @media (max-width: 768px) {
     header {
         flex-direction: column;
@@ -189,7 +188,6 @@ body.page-administracao header {
         margin: 5px auto;
     }
 
-    /* Oculta os cabeçalhos da tabela no mobile */
     thead {
         display: none !important;
     }
@@ -252,7 +250,6 @@ body.page-administracao header {
         margin: 5px 0;
     }
 
-    /* --- NOVO BLOCO: Ajustes do formulário para telas menores --- */
     form {
         padding: 1rem;
         display: flex;
@@ -282,7 +279,6 @@ body.page-administracao header {
     }
 }
 
-/* Ajustes para telas muito pequenas */
 @media (max-width: 480px) {
     body {
         padding: 0;
@@ -331,7 +327,6 @@ body.page-administracao header {
     width: 10%;
 }
 
-/* Ajuste do filtro para telas menores */
 @media (max-width: 768px) {
     .filtro-form {
         position: static;
@@ -356,7 +351,6 @@ body.page-administracao header {
     }
 }
 
-/* Mantém esta regra para outros forms na página admin */
 body.page-admin form:not(.logout-form):not(.filtro-form) {
     all: unset;
     display: flex;

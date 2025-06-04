@@ -4,28 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Marcação de Consulta</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     <header>
         <div class="logo">
-            <img src="/static/logo.png" alt="Logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
         </div>
-        <h1>Agendamento de consultas (Serviço Prestado)</h1>
+        <h1>Agendamento de consultas (Psicologia)</h1>
     </header>
     
     <form method="POST">
         <label for="nome">Nome Completo:</label>
         <input type="text" name="nome" value="{{ request.form['nome'] if request.form.get('nome') else '' }}" required>
         
-        <label for="email">E-mail Institucional:</label>
+        <label for="email">E-mail:</label>
         <input type="email" name="email" value="{{ request.form['email'] if request.form.get('email') else '' }}" required>
         
         <label for="matricula">Matrícula Reduzida:</label>
-        <input type="text" name="matricula" id="matricula" required pattern="\d{4,8}" title="A matrícula deve conter entre 4 e 8 números">
+        <input type="text" name="matricula" id="matricula" value="{{ request.form['matricula'] if request.form.get('matricula') else '' }}" required pattern="\d{4,8}" title="A matrícula deve conter entre 4 e 8 números">
+        
+        <label for="telefone">Telefone:</label>
+        <input type="tel" name="telefone" id="telefone" value="{{ request.form['telefone'] if request.form.get('telefone') else '' }}" pattern="\d{9,15}" title="O telefone deve conter entre 9 e 15 números. Ex: 21987654321">
+        {# O campo telefone não é 'required' no backend, então removi aqui também para consistência #}
         
         <label for="data">Data da Consulta:</label>
-        <input type="date" id="data" name="data" value="{{ request.form['data'] if request.form.get('data') else '' }}" required>
+        <input type="date" id="data" name="data" value="{{ request.form['data'] if request.form.get('data') else '' }}" min="{{ min_date_allowed }}" required>
 
         <label for="horario">Horário da Consulta:</label>
         <select id="horario" name="horario" required disabled>
@@ -41,35 +45,47 @@
             const horarioSelect = document.getElementById('horario');
 
             function atualizarHorariosDisponiveis() {
-                if (!dataInput.value) {
-                    horarioSelect.innerHTML = '<option value="">Selecione primeiro uma data válida</option>';
-                    horarioSelect.disabled = true;
+                const dataSelecionada = dataInput.value;
+                
+                horarioSelect.innerHTML = '<option value="">Selecione primeiro uma data válida</option>';
+                horarioSelect.disabled = true;
+
+                if (!dataSelecionada) {
                     return;
                 }
 
-                // Mostrar mensagem de carregamento
+                const hoje = new Date();
+                hoje.setHours(0,0,0,0);
+                const dataObjSelecionada = new Date(dataSelecionada + 'T00:00:00');
+
+                if (dataObjSelecionada < hoje && dataInput.min && dataObjSelecionada < new Date(dataInput.min + 'T00:00:00')) {
+                }
+
                 horarioSelect.innerHTML = '<option value="">Carregando horários disponíveis...</option>';
                 horarioSelect.disabled = true;
 
-                fetch(`/get_horarios_disponiveis?data=${dataInput.value}`)
+                fetch(`/get_horarios_disponiveis?data=${dataSelecionada}`)
                     .then(response => {
                         if (!response.ok) {
-                            throw new Error('Erro na requisição');
+                            return response.json().then(errData => {
+                                throw new Error(errData.error || 'Erro na requisição de horários');
+                            }).catch(() => {
+                                throw new Error('Erro na requisição de horários. Status: ' + response.status);
+                            });
                         }
                         return response.json();
                     })
                     .then(data => {
                         if (data.error) {
                             alert(data.error);
-                            dataInput.value = '';
-                            horarioSelect.innerHTML = '<option value="">Selecione primeiro uma data válida</option>';
+                            horarioSelect.innerHTML = '<option value="">Data inválida ou sem horários</option>';
                             horarioSelect.disabled = true;
                             return;
                         }
 
-                        if (data.length === 0) {
+                        if (Array.isArray(data) && data.length === 0) {
                             horarioSelect.innerHTML = '<option value="">Nenhum horário disponível para esta data</option>';
-                        } else {
+                        } else if (Array.isArray(data)) {
                             horarioSelect.innerHTML = '<option value="">Selecione um horário</option>';
                             data.forEach(horario => {
                                 const option = document.createElement('option');
@@ -77,13 +93,22 @@
                                 option.textContent = horario;
                                 horarioSelect.appendChild(option);
                             });
+                            horarioSelect.disabled = false;
+                        } else {
+                            console.error('Resposta inesperada do servidor:', data);
+                            horarioSelect.innerHTML = '<option value="">Erro ao processar horários</option>';
                         }
-                        horarioSelect.disabled = false;
                     })
                     .catch(error => {
-                        console.error('Erro:', error);
+                        console.error('Erro ao buscar horários:', error);
+                        alert('Não foi possível carregar os horários. ' + error.message);
                         horarioSelect.innerHTML = '<option value="">Erro ao carregar horários</option>';
+                        horarioSelect.disabled = true;
                     });
+            }
+            
+            if (dataInput.value) {
+                atualizarHorariosDisponiveis();
             }
 
             dataInput.addEventListener('change', atualizarHorariosDisponiveis);
