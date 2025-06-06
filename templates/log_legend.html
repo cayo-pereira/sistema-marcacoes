@@ -1,225 +1,166 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
-    <title>Legenda Completa dos Logs</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legenda dos Logs</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
-        h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
-        h2 { color: #2980b9; margin-top: 25px; }
-        table { border-collapse: collapse; width: 100%; margin: 20px 0; box-shadow: 0 2px 3px rgba(0,0,0,0.1); }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background-color: #3498db; color: white; }
-        tr:nth-child(even) { background-color: #f2f2f2; }
-        tr:hover { background-color: #eaf2f8; }
-        code { background: #f5f5f5; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
-        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; border-left: 4px solid #3498db; overflow-x: auto; }
-        .error-code { font-weight: bold; color: #c0392b; }
-        .back-link { display: inline-block; margin-top: 20px; padding: 8px 15px; background: #3498db; color: white; text-decoration: none; border-radius: 4px; }
-        .back-link:hover { background: #2980b9; }
-        .section { margin-bottom: 30px; }
+        .legend-section {
+            margin-bottom: 2.5rem;
+        }
+        .legend-section h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-bottom: 1.5rem;
+        }
+        code {
+            background-color: #e0f2f1;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #00695C;
+        }
+        pre {
+            background-color: #f4f6f8;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin: 5px 0 0 0;
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
-    <h1>Legenda Completa dos Logs de Auditoria</h1>
-    
-    <div class="section">
-        <h2>Ações de Agendamento</h2>
-        <table>
-            <tr>
-                <th>Ação</th>
-                <th>Descrição</th>
-                <th>Exemplo</th>
-                <th>Explicação</th>
-            </tr>
-            <tr>
-                <td><code>CREATE_APPOINTMENT</code></td>
-                <td>Nova consulta agendada</td>
-                <td><pre>{
+    <header>
+        <div class="logo-container">
+            <div class="logo">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+            </div>
+            <h1>Legenda dos Logs de Auditoria</h1>
+        </div>
+        <a href="{{ url_for('view_logs') }}" class="btn btn-secondary">Voltar aos Logs</a>
+    </header>
+
+    <div class="container">
+
+        <div class="legend-section">
+            <h2>Ações de Agendamento</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ação</th>
+                        <th>Descrição</th>
+                        <th>Exemplo de Detalhes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-label="Ação"><code>CREATE_APPOINTMENT</code></td>
+                        <td data-label="Descrição">Registo de um novo agendamento feito por um utilizador.</td>
+                        <td data-label="Exemplo"><pre>"new_value": {
   "nome": "João Silva",
-  "email": "joao@exemplo.com",
-  "matricula": "123456",
-  "data": "2023-10-05",
-  "horario": "14:00",
-  "semana": 40
+  "data": "2024-10-05",
+  "horario": "14:00"
 }</pre></td>
-                <td>
-                    <strong>Campos:</strong><br>
-                    • <code>nome</code>: Nome do paciente<br>
-                    • <code>email</code>: Email do paciente<br>
-                    • <code>matricula</code>: Matrícula acadêmica<br>
-                    • <code>data</code>: Data da consulta (YYYY-MM-DD)<br>
-                    • <code>horario</code>: Horário da consulta<br>
-                    • <code>semana</code>: Número da semana ISO
-                </td>
-            </tr>
-            <tr>
-                <td><code>UPDATE_APPOINTMENT</code></td>
-                <td>Consulta modificada</td>
-                <td><pre>{
-  "old": {
-    "horario": "14:00",
-    "data": "2023-10-05"
-  },
-  "new": {
-    "horario": "15:00",
-    "data": "2023-10-06"
-  }
+                    </tr>
+                    <tr>
+                        <td data-label="Ação"><code>DELETE_APPOINTMENT</code></td>
+                        <td data-label="Descrição">Um administrador apagou um agendamento existente.</td>
+                        <td data-label="Exemplo"><pre>"old_value": {
+  "id": 42,
+  "nome": "Maria Oliveira",
+  "deleted_by": "admin"
 }</pre></td>
-                <td>
-                    <strong>Campos:</strong><br>
-                    • <code>old</code>: Valores antes da alteração<br>
-                    • <code>new</code>: Valores após a alteração<br>
-                    Mostra apenas os campos que foram modificados
-                </td>
-            </tr>
-            <tr>
-                <td><code>DELETE_APPOINTMENT</code></td>
-                <td>Consulta cancelada</td>
-                <td><pre>{
-              "id": 42,
-              "nome": "Maria Oliveira",
-              "email": "maria@exemplo.com",
-              "data": "2023-10-05",
-              "horario": "10:00",
-              "semana": 40,
-              "matricula": "123456",
-              "deleted_by": "admin_user123"
-            }</pre></td>
-                <td>
-                    <strong>Campos:</strong><br>
-                    • <code>id</code>: ID da consulta removida<br>
-                    • <code>nome</code>, <code>email</code>, <code>matricula</code>: Dados do paciente<br>
-                    • <code>data</code>, <code>horario</code>: Quando a consulta estava marcada<br>
-                    • <code>semana</code>: Número da semana ISO<br>
-                    • <code class="deleted-by">deleted_by</code>: <span class="deleted-by">Usuário admin que realizou a exclusão</span>
-                </td>
-            </tr>
-        </table>
-    </div>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-    <div class="section">
-        <h2>Ações de Email</h2>
-        <table>
-            <tr>
-                <th>Ação</th>
-                <th>Descrição</th>
-                <th>Exemplo</th>
-                <th>Explicação</th>
-            </tr>
-            <tr>
-                <td><code>SEND_CONFIRMATION_EMAIL</code></td>
-                <td>Email de confirmação enviado</td>
-                <td><pre>{
-  "to": "paciente@exemplo.com",
-  "subject": "Confirmação de Consulta",
-  "data_consulta": "2023-10-05",
-  "horario_consulta": "14:00"
+        <div class="legend-section">
+            <h2>Ações de Autenticação e Utilizadores</h2>
+            <table>
+                 <thead>
+                    <tr>
+                        <th>Ação</th>
+                        <th>Descrição</th>
+                        <th>Exemplo de Detalhes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td data-label="Ação"><code>ADMIN_LOGIN</code></td>
+                        <td data-label="Descrição">Login bem-sucedido de um administrador.</td>
+                        <td data-label="Exemplo"><pre>"new_value": {
+  "username": "admin",
+  "level": "primary"
 }</pre></td>
-                <td>
-                    <strong>Campos:</strong><br>
-                    • <code>to</code>: Email do destinatário<br>
-                    • <code>subject</code>: Assunto do email<br>
-                    • <code>data_consulta</code>: Data da consulta<br>
-                    • <code>horario_consulta</code>: Horário da consulta
-                </td>
-            </tr>
-            <tr>
-                <td><code>EMAIL_SEND_ERROR</code></td>
-                <td>Falha no envio de email</td>
-                <td><pre>{
-  "error": "(535, b'Incorrect authentication data')",
-  "to": "paciente@exemplo.com"
+                    </tr>
+                    <tr>
+                        <td data-label="Ação"><code>ADMIN_LOGOUT</code></td>
+                        <td data-label="Descrição">Logout de um administrador.</td>
+                        <td data-label="Exemplo"><pre>"new_value": {
+  "username": "secundario"
 }</pre></td>
-                <td>
-                    <strong>Campos:</strong><br>
-                    • <code>error</code>: Detalhes do erro SMTP<br>
-                    • <code>to</code>: Email que deveria receber<br><br>
-                    <strong>Erros comuns:</strong><br>
-                    • <span class="error-code">535</span>: Autenticação falhou<br>
-                    • <span class="error-code">550</span>: Email inválido<br>
-                    • <span class="error-code">421</span>: Servidor indisponível
-                </td>
-            </tr>
-        </table>
-    </div>
+                    </tr>
+                    <tr>
+                        <td data-label="Ação"><code>FAILED_LOGIN_ATTEMPT</code></td>
+                        <td data-label="Descrição">Tentativa de login falhada na área de administração.</td>
+                        <td data-label="Exemplo"><pre>"new_value": {
+  "username": "tentativa"
+}</pre></td>
+                    </tr>
+                    <tr>
+                        <td data-label="Ação"><code>CREATE_ADMIN_USER</code></td>
+                        <td data-label="Descrição">Criação de uma nova conta de administrador secundário.</td>
+                        <td data-label="Exemplo"><pre>"new_value": {
+  "username": "novo_admin"
+}</pre></td>
+                    </tr>
+                     <tr>
+                        <td data-label="Ação"><code>DELETE_ADMIN_USER</code></td>
+                        <td data-label="Descrição">Exclusão de uma conta de administrador secundário.</td>
+                        <td data-label="Exemplo"><pre>"old_value": {
+  "username": "admin_removido"
+}</pre></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-    <div class="section">
-        <h2>Ações de Autenticação</h2>
-        <table>
-            <tr>
-                <th>Ação</th>
-                <th>Descrição</th>
-                <th>Exemplo</th>
-                <th>Explicação</th>
-            </tr>
-            <tr>
-                <td><code>ADMIN_LOGIN</code></td>
-                <td>Login administrativo bem-sucedido</td>
-                <td><pre>{
-  "username": "admin"
+        <div class="legend-section">
+            <h2>Ações do Sistema</h2>
+            <table>
+                 <thead>
+                    <tr>
+                        <th>Ação</th>
+                        <th>Descrição</th>
+                        <th>Exemplo de Detalhes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                     <tr>
+                        <td data-label="Ação"><code>UPDATE_SETTING</code></td>
+                        <td data-label="Descrição">Alteração de uma configuração geral do sistema.</td>
+                        <td data-label="Exemplo"><pre>"new_value": {
+  "key": "appointment_duration",
+  "value": "45"
 }</pre></td>
-                <td>
-                    Registra o nome de usuário que fez login no sistema administrativo
-                </td>
-            </tr>
-            <tr>
-                <td><code>ADMIN_LOGOUT</code></td>
-                <td>Logout do sistema</td>
-                <td><pre>{
-  "username": "admin"
+                    </tr>
+                    <tr>
+                        <td data-label="Ação"><code>EXPORT_APPOINTMENTS</code></td>
+                        <td data-label="Descrição">Exportação da lista de agendamentos para um ficheiro Excel.</td>
+                        <td data-label="Exemplo"><pre>"new_value": {
+  "exported_records": 150,
+  "export_by_user": "admin"
 }</pre></td>
-                <td>
-                    Registra o nome de usuário que fez logout do sistema
-                </td>
-            </tr>
-            <tr>
-                <td><code>FAILED_LOGIN_ATTEMPT</code></td>
-                <td>Tentativa de login falha</td>
-                <td><pre>{
-  "username": "tentativa",
-  "ip": "192.168.1.100"
-}</pre></td>
-                <td>
-                    <strong>Campos:</strong><br>
-                    • <code>username</code>: Nome de usuário tentado<br>
-                    • <code>ip</code>: Endereço IP de origem<br>
-                    Registra tentativas de login com credenciais inválidas
-                </td>
-            </tr>
-        </table>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
-
-    <div class="section">
-        <h2>Códigos de Erro SMTP</h2>
-        <table>
-            <tr>
-                <th>Código</th>
-                <th>Significado</th>
-                <th>Solução Sugerida</th>
-            </tr>
-            <tr>
-                <td><span class="error-code">421</span></td>
-                <td>Serviço indisponível / Problema no servidor SMTP</td>
-                <td>Verificar conexão com servidor de email</td>
-            </tr>
-            <tr>
-                <td><span class="error-code">535</span></td>
-                <td>Falha na autenticação (credenciais incorretas)</td>
-                <td>Verificar usuário/senha do email no config.py</td>
-            </tr>
-            <tr>
-                <td><span class="error-code">550</span></td>
-                <td>Email rejeitado (destinatário inválido)</td>
-                <td>Verificar se o email do paciente está correto</td>
-            </tr>
-            <tr>
-                <td><span class="error-code">553</span></td>
-                <td>Endereço do remetente inválido</td>
-                <td>Verificar EMAIL_USER no config.py</td>
-            </tr>
-        </table>
-    </div>
-
-    <a href="{{ url_for('view_logs') }}" class="back-link">← Voltar para os Logs</a>
 </body>
 </html>

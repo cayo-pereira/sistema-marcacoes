@@ -4,16 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consulta Agendada</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .success-content {
+            text-align: center;
+        }
+        .success-content h2 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+        .success-content p {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+        .success-content .appointment-details {
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+    </style>
 </head>
 <body>
     <header>
-        <div class="logo">
-            <img src="/static/logo.png" alt="Logo">
+        <div class="logo-container">
+            <div class="logo">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+            </div>
+            <h1>Agendamento Concluído</h1>
         </div>
-        <h1>Consulta Agendada com Sucesso!</h1>
     </header>
-    <p>Sua consulta foi agendada para {{ data }} às {{ horario }}.</p>
-    <a href="/">Voltar para a página inicial</a>
+
+    <div class="container success-content">
+        <h2>Consulta Agendada com Sucesso!</h2>
+        <p>A sua consulta foi confirmada para o dia <span class="appointment-details">{{ data }}</span> às <span class="appointment-details">{{ horario }}</span>.</p>
+        <a href="{{ url_for('marcacao') }}" class="btn btn-primary">Agendar Nova Consulta</a>
+    </div>
 </body>
 </html>

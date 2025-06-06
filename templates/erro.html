@@ -3,41 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Erro</title>
+    <title>Erro no Agendamento</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #00407a;
-            color: white;
+        .error-content {
             text-align: center;
-            padding: 50px;
         }
-        h1 {
-            font-size: 2em;
+        .error-content h1 {
+            color: var(--danger-hover-color);
+            margin-bottom: 1rem;
         }
-        p {
-            font-size: 1.2em;
-        }
-        .button {
-            background-color: #ffffff;
-            color: #00407a;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-        }
-        .button:hover {
-            background-color: #e0e0e0;
+        .error-content p {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
         }
     </style>
 </head>
 <body>
+    <header>
+        <div class="logo-container">
+            <div class="logo">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+            </div>
+            <h1>Ocorreu um Problema</h1>
+        </div>
+    </header>
 
-    <h1>Ocorreu um erro</h1>
-    <p>{{ mensagem }}</p>
-    <br>
-    <a href="/" class="button">Voltar para a página inicial</a>
+    <div class="container error-content">
+        <h1>Ops! Algo não deu certo.</h1>
+        <p>{{ mensagem }}</p>
+        <a href="{{ url_for('marcacao') }}" class="btn btn-primary">Tentar Novamente</a>
+    </div>
 
 </body>
 </html>

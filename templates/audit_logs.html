@@ -4,65 +4,77 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Logs de Auditoria</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h1 { color: #333; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        pre { white-space: pre-wrap; margin: 0; }
-        .back-link { display: block; margin-top: 20px; }
-        .deleted-by { color: #d9534f; font-weight: bold; }
+        pre {
+            background-color: #f4f6f8;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin: 5px 0 0 0;
+            font-size: 0.9rem;
+        }
+        .log-details {
+            max-width: 400px; /* Evita que a coluna de detalhes fique muito larga */
+        }
     </style>
 </head>
 <body>
-    <h1>Logs de Auditoria</h1>
-    <a href="{{ url_for('log_legend') }}" style="display: block; margin: 20px 0;">
-        Ver Legenda Completa das Ações
-    </a>
-    
-    <table>
-        <thead>
-            <tr>
-                <th>Data/Hora</th>
-                <th>Ação</th>
-                <th>Usuário</th>
-                <th>Entidade</th>
-                <th>ID</th>
-                <th>IP</th>
-                <th>Detalhes</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for log in logs %}
-            <tr>
-                <td>{{ log.created_at }}</td>
-                <td>{{ log.action }}</td>
-                <td>{{ log.user_id }}</td>
-                <td>{{ log.entity_type }}</td>
-                <td>{{ log.entity_id if log.entity_id else '-' }}</td>
-                <td>{{ log.ip_address }}</td>
-                <td>
-                    {% if log.old_value %}
-                        {% if log.action == "DELETE_APPOINTMENT" and log.old_value.deleted_by %}
-                            <p style="color: #d9534f; font-weight: bold;">
-                                Excluído por: {{ log.old_value.deleted_by }}
-                            </p>
+    <header>
+        <div class="logo-container">
+            <div class="logo">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+            </div>
+            <h1>Logs de Auditoria</h1>
+        </div>
+        <a href="{{ url_for('admin') }}" class="btn btn-secondary">Voltar ao Painel</a>
+    </header>
+
+    <div class="container" style="max-width: 1200px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="color: var(--primary-color);">Registos do Sistema</h2>
+            <a href="{{ url_for('log_legend') }}" class="btn btn-primary">Ver Legenda</a>
+        </div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Data/Hora</th>
+                    <th>Ação</th>
+                    <th>Utilizador</th>
+                    <th>Entidade</th>
+                    <th>IP</th>
+                    <th class="log-details">Detalhes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td data-label="Data/Hora">{{ log.created_at | replace('T', ' ') | truncate(19, True, '') }}</td>
+                    <td data-label="Ação">{{ log.action }}</td>
+                    <td data-label="Utilizador">{{ log.user_id }}</td>
+                    <td data-label="Entidade">{{ log.entity_type }}{% if log.entity_id %} (ID: {{ log.entity_id }}){% endif %}</td>
+                    <td data-label="IP">{{ log.ip_address }}</td>
+                    <td data-label="Detalhes" class="log-details">
+                        {% if log.old_value %}
+                            <strong>Antes:</strong>
+                            <pre>{{ log.old_value | tojson(indent=2) }}</pre>
                         {% endif %}
-                        <strong>Antes:</strong>
-                        <pre>{{ log.old_value }}</pre>
-                    {% endif %}
-                    {% if log.new_value %}
-                        <strong>Depois:</strong>
-                        <pre>{{ log.new_value }}</pre>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    
-    <a href="{{ url_for('admin') }}" class="back-link">Voltar para a administração</a>
+                        {% if log.new_value %}
+                            <strong>Depois:</strong>
+                            <pre>{{ log.new_value | tojson(indent=2) }}</pre>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center;">Nenhum log encontrado.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>

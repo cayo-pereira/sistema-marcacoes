@@ -4,23 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Administração</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     <header>
-        <div class="logo">
-            <img src="/static/logo.png" alt="Logo">
+        <div class="logo-container">
+            <div class="logo">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+            </div>
+            <h1>Acesso Restrito</h1>
         </div>
-        <h1>Login do Administrador</h1>
     </header>
-    <form method="POST" action="/login">
-        <label for="usuario">Usuário:</label>
-        <input type="text" name="usuario" required>
+
+    <div class="container" style="max-width: 450px;">
+        <h2 style="text-align: center; color: var(--primary-color); margin-bottom: 1.5rem;">Login de Administrador</h2>
         
-        <label for="senha">Senha:</label>
-        <input type="password" name="senha" required>
-        
-        <button type="submit">Entrar</button>
-    </form>
+        {% if erro %}
+            <div class="flash-message flash-error" style="margin-bottom: 1rem;">{{ erro }}</div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('login') }}">
+            <label for="usuario">Utilizador:</label>
+            <input type="text" id="usuario" name="usuario" required>
+            
+            <label for="senha">Senha:</label>
+            <input type="password" id="senha" name="senha" required>
+            
+            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Entrar</button>
+        </form>
+    </div>
 </body>
 </html>

@@ -5,158 +5,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administração</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <style>
-        .admin-header-actions {
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .admin-header-actions .btn {
-            padding: 8px 15px; /* Ajustado para consistência */
-            font-size: 14px;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            text-decoration: none; /* Para links estilizados como botões */
-            display: inline-block;
-            text-align: center;
-        }
-        .btn-config {
-            background-color: #17a2b8; /* Azul info, pode ajustar */
-        }
-        .btn-config:hover {
-            background-color: #138496;
-        }
-        .btn-export { /* Estilo do seu CSS original */
-            background-color: #00a116;
-        }
-        .btn-export:hover {
-            background-color: #00b909;
-        }
-        .btn-sair { /* Estilo do seu CSS original */
-            background-color: #d9534f;
-        }
-        .btn-sair:hover {
-            background-color: #c9302c;
-        }
-
-        /* Ajustes para responsividade do header admin */
-        @media (max-width: 768px) {
-            .admin-header-actions {
-                position: static;
-                transform: none;
-                flex-direction: column; /* Empilhar botões verticalmente */
-                width: 100%;
-                max-width: 200px; /* Limitar largura dos botões empilhados */
-                margin: 15px auto 5px auto; /* Espaçamento */
-            }
-            .admin-header-actions .btn {
-                width: 100%; /* Fazer botões ocuparem largura total da coluna */
-                margin-bottom: 5px; /* Espaço entre botões empilhados */
-            }
-            header { /* Do seu CSS, mas ajustando gap para acomodar */
-                gap: 5px; /* Reduzir gap no mobile para header */
-            }
-        }
-    </style>
 </head>
-<body class="page-admin">
+<body>
     <header>
-        <div class="logo">
-            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+        <div class="logo-container">
+            <div class="logo">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+            </div>
+            <h1>Painel de Administração</h1>
         </div>
-        <h1>Painel de Administração</h1>
-
-        <div class="admin-header-actions">
+        <div class="admin-actions">
             {% if is_primary_admin %}
-            <a href="{{ url_for('config_page') }}" class="btn btn-config">Configurações</a>
+                <a href="{{ url_for('config_page') }}" class="btn btn-secondary">Configurações</a>
+                <a href="{{ url_for('view_logs') }}" class="btn btn-secondary">Logs</a>
             {% endif %}
-            <a href="{{ url_for('exportar_consultas') }}" class="btn btn-export">Exportar</a>
-            <form method="POST" action="{{ url_for('logout') }}" style="margin:0; padding:0; background:none; box-shadow:none; width:auto;">
-                <button type="submit" class="btn btn-sair">Sair</button>
+            <a href="{{ url_for('exportar_consultas') }}" class="btn btn-secondary">Exportar</a>
+            <form method="POST" action="{{ url_for('logout') }}" style="margin:0;">
+                <button type="submit" class="btn btn-danger">Sair</button>
             </form>
         </div>
-
+    </header>
+    
+    <div class="container" style="max-width: 1200px;">
         <form method="GET" action="{{ url_for('admin') }}" class="filtro-form">
             {% if admin_level == 'primary' %} 
-            <input type="text" name="filtro_nome" placeholder="Pesquisar por nome" value="{{ filtro_nome if filtro_nome else '' }}">
+                <input type="text" name="filtro_nome" placeholder="Pesquisar por nome..." value="{{ filtro_nome or '' }}">
             {% endif %}
-                       
-            <input type="date" name="filtro_data" id="filtro_data" value="{{ filtro_data | default('') }}">
-    
-            <button type="submit" class="btn-filtrar">Filtrar</button>
-    
+            <input type="date" name="filtro_data" id="filtro_data" value="{{ filtro_data or '' }}">
+            <button type="submit" class="btn btn-primary">Filtrar</button>
             {% if filtro_nome or filtro_data %}
-                <a href="{{ url_for('admin') }}" style="margin-left: 10px; color: #00407a; text-decoration: none;">Limpar Filtros</a>
+                <a href="{{ url_for('admin') }}" class="btn-link">Limpar Filtros</a>
             {% endif %}
         </form>
-    </header> 
-    
-    <table border="1">
-        <thead>
-            <tr>
-                {% if admin_level == 'primary' %}
-                <th>Nome</th>
-                <th>Email</th>
-                <th>Telefone</th>
-                {% endif %}
-                <th>Data</th>
-                <th>Horário</th>
-                {% if admin_level == 'primary' %}
-                <th>Matrícula</th>
-                {% endif %}
-                <th class="acao-coluna">Ação</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for consulta in consultas %}
-            <tr>
-                {% if admin_level == 'primary' %}
-                <td data-label="Nome">{{ consulta['nome'] }}</td>
-                <td data-label="Email">{{ consulta['email'] }}</td>
-                <td data-label="Telefone">{{ consulta['telefone'] if consulta['telefone'] else '-' }}</td>
+
+        <table>
+            <thead>
+                <tr>
+                    {% if admin_level == 'primary' %}
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>Telefone</th>
+                    <th>Matrícula</th>
+                    {% endif %}
+                    <th>Data</th>
+                    <th>Horário</th>
+                    <th style="text-align: center;">Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for consulta in consultas %}
+                <tr>
+                    {% if admin_level == 'primary' %}
+                    <td data-label="Nome">{{ consulta.nome }}</td>
+                    <td data-label="Email">{{ consulta.email }}</td>
+                    <td data-label="Telefone">{{ consulta.telefone or '-' }}</td>
+                    <td data-label="Matrícula">{{ consulta.matricula }}</td>
+                    {% endif %}
+                    <td data-label="Data">{{ consulta.data }}</td>
+                    <td data-label="Horário">{{ consulta.horario }}</td>
+                    <td data-label="Ação" class="acao-coluna" style="text-align: center;">
+                        <form method="POST" action="{{ url_for('excluir') }}">
+                            <input type="hidden" name="id" value="{{ consulta.id }}">
+                            <input type="hidden" name="original_filtro_data" value="{{ filtro_data or '' }}">
+                            <input type="hidden" name="original_filtro_nome" value="{{ filtro_nome or '' }}">
+                            <button type="submit" class="btn btn-danger">Excluir</button>
+                        </form>
+                    </td>
+                </tr>
                 {% else %}
-                    {# Para admin secundário, estas colunas não são selecionadas no app.py #}
-                    {# Os ifs abaixo garantem que não haverá erro se a chave não existir #}
-                    {# No entanto, o app.py já garante que admin secundário só recebe 'id', 'data', 'horario' #}
-                    {% if 'nome' in consulta %}{% endif %}
-                    {% if 'email' in consulta %}{% endif %}
-                    {% if 'telefone' in consulta %}{% endif %}
-                {% endif %}
-
-                <td data-label="Data">{{ consulta['data'] }}</td>
-                <td data-label="Horário">{{ consulta['horario'] }}</td>
-
-                {% if admin_level == 'primary' %}
-                <td data-label="Matrícula">{{ consulta['matricula'] }}</td>
-                {% else %}
-                     {% if 'matricula' in consulta %}{% endif %}
-                {% endif %}
-
-                <td class="acao-coluna" data-label="Ação">
-                    {# Apenas Admin Primário pode excluir? Ou qualquer admin? #}
-                    {# Pela lógica original, qualquer admin logado podia. Vamos manter. #}
-                    {# Se quiser restringir, adicione if is_primary_admin #}
-                    <form method="POST" action="{{ url_for('excluir') }}">
-                        <input type="hidden" name="id" value="{{ consulta['id'] }}">
-                        {% if filtro_data %}
-                        <input type="hidden" name="original_filtro_data" value="{{ filtro_data }}">
-                        {% endif %}
-                        {% if filtro_nome and admin_level == 'primary' %} 
-                        <input type="hidden" name="original_filtro_nome" value="{{ filtro_nome }}">
-                        {% endif %}
-                        <button type="submit" class="btn-excluir">Excluir</button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                <tr>
+                    <td colspan="{% if admin_level == 'primary' %}7{% else %}3{% endif %}" style="text-align: center;">Nenhuma consulta encontrada.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>
